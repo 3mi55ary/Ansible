@@ -1,0 +1,75 @@
+---
+- name: VyOS Router Congfiguration
+  hosts: vyos
+  gather_facts: no
+  become: yes
+  vars:
+    admin_password: "YOUR_NEW_PASSWORD"
+    wan_ip: "IP"
+    wan_gateway: "IP"
+    lan_ip: "IP"
+    lan_subnet: "IP"
+
+  tasks:
+    - name: Enter configuration mode and apply settings
+      vyos_config:
+        lines:
+          # General system setup
+          - set system login user vyos authentication plaintext-password {{ admin_password }}
+          - set system host-name ForwardUntoDawn
+
+          # Interface setup
+          - set interfaces ethernet eth0 address {{ wan_ip }}
+          - set protocols static route 0.0.0.0/0 next-hop {{ wan_gateway }}
+          - set interfaces ethernet eth0 description 'WAN'
+          - set interfaces ethernet eth1 address {{ lan_ip }}
+          - set interfaces ethernet eth1 description 'LAN'
+
+          # NAT
+          - set nat source rule 100 outbound-interface name eth0
+          - set nat source rule 100 source address {{ lan_subnet }}
+          - set nat source rule 100 translation address masquerade
+
+          # Firewall rules
+          - set firewall ipv4 name WAN_IN default-action drop
+          - set firewall ipv4 name WAN_IN default-log
+          - set firewall ipv4 name LAN_OUT default-action accept
+          - set firewall zone WAN member interface eth0
+          - set firewall zone WAN intra-zone-filtering firewall name WAN_IN
+          - set firewall zone LAN member interface eth1
+          - set firewall zone LAN intra-zone-filtering firewall name LAN_OUT
+
+          - set firewall ipv4 name WANTOLAN default-action drop
+          - set firewall ipv4 name WANTOLAN rule 10 action accept
+          - set firewall ipv4 name WANTOLAN rule 10 state established
+          - set firewall ipv4 name WANTOLAN rule 10 state related
+          - set firewall zone LAN from WAN firewall name WANTOLAN
+
+          - set firewall ipv4 name LOCALWANIN default-action drop
+          - set firewall ipv4 name LOCALWANIN rule 10 action accept
+          - set firewall ipv4 name LOCALWANIN rule 10 state established
+          - set firewall ipv4 name LOCALWANIN rule 10 state related
+          - set interfaces ethernet eth0 firewall local name LOCALWANIN
+
+          # DNS
+          - set system name-server 1.1.1.1
+          - set system name-server 8.8.8.8
+          - set service dns forwarding
+          - set service dns forwarding allow-from {{ lan_subnet }}
+          - set service dns forwarding listen-address 172.16.2.1
+          - set service dns forwarding system
+
+          # SSH service and LAN-only access
+          - set service ssh
+          - set service ssh connection-limit 3
+          - set service ssh rate-limit 30
+          - set firewall ipv4 name LOCALLANIN default-action drop
+          - set firewall ipv4 name LOCALLANIN rule 10 action accept
+          - set firewall ipv4 name LOCALLANIN rule 10 state new
+          - set firewall ipv4 name LOCALLANIN rule 10 protocol tcp
+          - set firewall ipv4 name LOCALLANIN rule 10 destination port 22
+          - set firewall ipv4 name LOCALLANIN rule 10 source address {{ lan_subnet }}
+          - set interfaces ethernet eth1 firewall local name LOCALLANIN
+
+        commit: yes
+        save: yes
