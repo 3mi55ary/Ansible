@@ -9,6 +9,8 @@
     wan_gateway: "IP"
     lan_ip: "IP"
     lan_subnet: "IP"
+    vrrp_wan_address: "IP/"
+    vrrp_lan_address: "IP/"
 
   tasks:
     - name: Enter configuration mode and apply settings
@@ -16,7 +18,7 @@
         lines:
           # General system setup
           - set system login user vyos authentication plaintext-password {{ admin_password }}
-          - set system host-name ForwardUntoDawn
+          - set system host-name IndulgenceOfConviction
 
           # Interface setup
           - set interfaces ethernet eth0 address {{ wan_ip }}
@@ -45,11 +47,13 @@
           - set firewall ipv4 name WANTOLAN rule 10 state related
           - set firewall zone LAN from WAN firewall name WANTOLAN
 
+          - set firewall zone LOCAL default-action drop
+          - set firewall zone LOCAL member interface lo
           - set firewall ipv4 name LOCALWANIN default-action drop
           - set firewall ipv4 name LOCALWANIN rule 10 action accept
           - set firewall ipv4 name LOCALWANIN rule 10 state established
           - set firewall ipv4 name LOCALWANIN rule 10 state related
-          - set interfaces ethernet eth0 firewall local name LOCALWANIN
+          - set firewall zone LOCAL from WAN firewall name LOCALTOWAN
 
           # DNS
           - set system name-server 1.1.1.1
@@ -59,17 +63,17 @@
           - set service dns forwarding listen-address 172.16.2.1
           - set service dns forwarding system
 
-          # SSH service and LAN-only access
-          - set service ssh
-          - set service ssh connection-limit 3
-          - set service ssh rate-limit 30
-          - set firewall ipv4 name LOCALLANIN default-action drop
-          - set firewall ipv4 name LOCALLANIN rule 10 action accept
-          - set firewall ipv4 name LOCALLANIN rule 10 state new
-          - set firewall ipv4 name LOCALLANIN rule 10 protocol tcp
-          - set firewall ipv4 name LOCALLANIN rule 10 destination port 22
-          - set firewall ipv4 name LOCALLANIN rule 10 source address {{ lan_subnet }}
-          - set interfaces ethernet eth1 firewall local name LOCALLANIN
+          # VRRP
+          - set high-availability vrrp group WAN vrid 10
+          - set high-availability vrrp group WAN interface eth0
+          - set high-availability vrrp group WAN address {{ vrrp_wan_address }}
+          - set high-availability vrrp group WAN priority 150
+          - set high-availability vrrp group WAN preempt-delay 5
 
-        commit: yes
+          - set high-availability vrrp group LAN vrid 20
+          - set high-availability vrrp group LAN interface eth1
+          - set high-availability vrrp group LAN address {{ vrrp_lan_address }}
+          - set high-availability vrrp group LAN priority 150
+          - set high-availability vrrp group LAN preempt-delay 5
+
         save: yes
