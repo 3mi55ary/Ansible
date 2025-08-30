@@ -5,12 +5,12 @@
   become: yes
   vars:
     admin_password: "YOUR_NEW_PASSWORD"
-    wan_ip: "IP"
+    wan_ip: "IP/CIDR"
     wan_gateway: "IP"
-    lan_ip: "IP"
-    lan_subnet: "IP"
-    vrrp_wan_address: "IP/"
-    vrrp_lan_address: "IP/"
+    lan_ip: "IP/CIDR"
+    lan_subnet: "IP/CIDR"
+    vrrp_wan_address: "IP/CIDR"
+    vrrp_lan_address: "IP/CIRD"
 
   tasks:
     - name: Enter configuration mode and apply settings
