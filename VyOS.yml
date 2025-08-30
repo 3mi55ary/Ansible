@@ -53,7 +53,7 @@
           - set firewall ipv4 name LOCALWANIN rule 10 action accept
           - set firewall ipv4 name LOCALWANIN rule 10 state established
           - set firewall ipv4 name LOCALWANIN rule 10 state related
-          - set firewall zone LOCAL from WAN firewall name LOCALTOWAN
+          - set firewall zone LOCAL from WAN firewall name LOCALWANIN
 
           # DNS
           - set system name-server 1.1.1.1
