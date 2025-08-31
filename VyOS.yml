@@ -1,6 +1,6 @@
 ---
 - name: VyOS Router Congfiguration
-  hosts: vyos
+  hosts: vyos_hosts
   gather_facts: no
   become: yes
   vars:
