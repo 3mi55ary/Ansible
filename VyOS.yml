@@ -8,6 +8,7 @@
     wan_ip: "IP/CIDR"
     wan_gateway: "IP"
     lan_ip: "IP/CIDR"
+    lan_ip_nocidr: "IP"
     lan_subnet: "IP/CIDR"
     dns_address: "IP"
     vrrp_wan_address: "IP/CIDR"
@@ -39,6 +40,7 @@
           - set service dns forwarding
           - set service dns forwarding allow-from {{ lan_subnet }}
           - set service dns forwarding listen-address {{ dns_address }}
+          - set service dns forwarding listen-address {{ lan_ip_nocidr }}
           - set service dns forwarding system
 
           # Firewall Rules
@@ -63,6 +65,24 @@
           - set firewall ipv4 name WANTOLAN rule 10 state related
           - set firewall zone LAN from WAN firewall name WANTOLAN
 
+          - set firewall ipv4 name LOCALTOWAN default-action drop
+          - set firewall ipv4 name LOCALTOWAN rule 10 action accept
+          - set firewall ipv4 name LOCALTOWAN rule 10 protocol udp
+          - set firewall ipv4 name LOCALTOWAN rule 10 destination port 53
+          - set firewall ipv4 name LOCALTOWAN rule 20 action accept
+          - set firewall ipv4 name LOCALTOWAN rule 20 protocol tcp
+          - set firewall ipv4 name LOCALTOWAN rule 20 destination port 53
+          - set firewall ipv4 name LOCALTOWAN rule 90 action accept
+          - set firewall ipv4 name LOCALTOWAN rule 90 state established
+          - set firewall ipv4 name LOCALTOWAN rule 90 state related
+          - set firewall zone WAN from LOCAL firewall name LOCALTOWAN
+
+          - set firewall ipv4 name WANTOLOCAL default-action drop
+          - set firewall ipv4 name WANTOLOCAL rule 10 action accept
+          - set firewall ipv4 name WANTOLOCAL rule 10 state established
+          - set firewall ipv4 name WANTOLOCAL rule 10 state related
+          - set firewall zone LOCAL from WAN firewall name WANTOLOCAL
+
           # Firewall Service Rules
           - set firewall ipv4 name LANTOLOCAL default-action drop
           - set firewall ipv4 name LANTOLOCAL rule 10 action accept
@@ -75,7 +95,18 @@
           - set firewall ipv4 name LANTOLOCAL rule 20 destination port 53
           - set firewall ipv4 name LANTOLOCAL rule 20 source address 172.16.2.0/24
 
+          - set firewall ipv4 name LANTOLOCAL rule 21 action accept
+          - set firewall ipv4 name LANTOLOCAL rule 21 protocol tcp
+          - set firewall ipv4 name LANTOLOCAL rule 21 destination port 53
+          - set firewall ipv4 name LANTOLOCAL rule 21 source address 172.16.2.0/24
+
           - set firewall zone LOCAL from LAN firewall name LANTOLOCAL
+
+          - set firewall ipv4 name LOCALTOLAN default-action drop
+          - set firewall ipv4 name LOCALTOLAN rule 10 action accept
+          - set firewall ipv4 name LOCALTOLAN rule 10 state established
+          - set firewall ipv4 name LOCALTOLAN  rule 10 state related
+          - set firewall zone LAN from LOCAL firewall name LOCALTOLAN
 
           # VRRP
           - set high-availability vrrp group WAN vrid 10
