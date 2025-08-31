@@ -32,7 +32,7 @@
           - set nat source rule 100 source address {{ lan_subnet }}
           - set nat source rule 100 translation address masquerade
 
-          # Firewall rules
+          # Firewall Rules
           - set firewall zone WAN member interface eth0
           - set firewall zone LAN member interface eth1
           - set firewall zone LOCAL local-zone
@@ -54,12 +54,18 @@
           - set firewall ipv4 name WANTOLAN rule 10 state related
           - set firewall zone LAN from WAN firewall name WANTOLAN
 
-          # SSH
+          # Firewall Service Rules
           - set firewall ipv4 name LANTOLOCAL default-action drop
           - set firewall ipv4 name LANTOLOCAL rule 10 action accept
           - set firewall ipv4 name LANTOLOCAL rule 10 protocol tcp
           - set firewall ipv4 name LANTOLOCAL rule 10 destination port 22
           - set firewall ipv4 name LANTOLOCAL rule 10 source address 172.16.2.0/24
+
+          - set firewall ipv4 name LANTOLOCAL rule 20 action accept
+          - set firewall ipv4 name LANTOLOCAL rule 20 protocol udp
+          - set firewall ipv4 name LANTOLOCAL rule 20 destination port 53
+          - set firewall ipv4 name LANTOLOCAL rule 20 source address 172.16.2.0/24
+
           - set firewall zone LOCAL from LAN firewall name LANTOLOCAL
 
           # DNS
@@ -67,7 +73,7 @@
           - set system name-server 8.8.8.8
           - set service dns forwarding
           - set service dns forwarding allow-from {{ lan_subnet }}
-          - set service dns forwarding listen-address 172.16.2.1
+          - set service dns forwarding listen-address {{ vrrp_lan_address }}
           - set service dns forwarding system
 
           # VRRP
