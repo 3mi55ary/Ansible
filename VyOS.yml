@@ -33,27 +33,19 @@
           - set nat source rule 100 translation address masquerade
 
           # Firewall rules
-          - set firewall ipv4 name WAN_IN default-action drop
-          - set firewall ipv4 name WAN_IN default-log
-          - set firewall ipv4 name LAN_OUT default-action accept
-          - set firewall zone WAN member interface eth0
-          - set firewall zone WAN intra-zone-filtering firewall name WAN_IN
-          - set firewall zone LAN member interface eth1
-          - set firewall zone LAN intra-zone-filtering firewall name LAN_OUT
+          - set firewall zone name WAN interface eth0
+          - set firewall zone name LAN interface eth1
+          - set firewall zone LOCAL local-zone
+
+          - set firewall zone WAN default-action drop
+          - set firewall zone LAN default-action allow
+          - set firewall zone LOCAL default-action drop
 
           - set firewall ipv4 name WANTOLAN default-action drop
           - set firewall ipv4 name WANTOLAN rule 10 action accept
           - set firewall ipv4 name WANTOLAN rule 10 state established
           - set firewall ipv4 name WANTOLAN rule 10 state related
           - set firewall zone LAN from WAN firewall name WANTOLAN
-
-          - set firewall zone LOCAL default-action drop
-          - set firewall zone LOCAL member interface lo
-          - set firewall ipv4 name LOCALWANIN default-action drop
-          - set firewall ipv4 name LOCALWANIN rule 10 action accept
-          - set firewall ipv4 name LOCALWANIN rule 10 state established
-          - set firewall ipv4 name LOCALWANIN rule 10 state related
-          - set firewall zone LOCAL from WAN firewall name LOCALWANIN
 
           # DNS
           - set system name-server 1.1.1.1
