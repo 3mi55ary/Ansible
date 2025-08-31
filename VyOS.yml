@@ -90,4 +90,4 @@
           - set high-availability vrrp group LAN priority 150
           - set high-availability vrrp group LAN preempt-delay 5
 
-        save: yes
+        save: true
