@@ -31,6 +31,14 @@
           - set nat source rule 100 outbound-interface name eth0
           - set nat source rule 100 source address {{ lan_subnet }}
           - set nat source rule 100 translation address masquerade
+          
+          # DNS
+          - set system name-server 1.1.1.1
+          - set system name-server 8.8.8.8
+          - set service dns forwarding
+          - set service dns forwarding allow-from {{ lan_subnet }}
+          - set service dns forwarding listen-address {{ vrrp_lan_address }}
+          - set service dns forwarding system
 
           # Firewall Rules
           - set firewall zone WAN member interface eth0
@@ -67,14 +75,6 @@
           - set firewall ipv4 name LANTOLOCAL rule 20 source address 172.16.2.0/24
 
           - set firewall zone LOCAL from LAN firewall name LANTOLOCAL
-
-          # DNS
-          - set system name-server 1.1.1.1
-          - set system name-server 8.8.8.8
-          - set service dns forwarding
-          - set service dns forwarding allow-from {{ lan_subnet }}
-          - set service dns forwarding listen-address {{ vrrp_lan_address }}
-          - set service dns forwarding system
 
           # VRRP
           - set high-availability vrrp group WAN vrid 10
