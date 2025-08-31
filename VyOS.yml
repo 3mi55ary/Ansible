@@ -10,7 +10,7 @@
     lan_ip: "IP/CIDR"
     lan_subnet: "IP/CIDR"
     vrrp_wan_address: "IP/CIDR"
-    vrrp_lan_address: "IP/CIRD"
+    vrrp_lan_address: "IP/CIDR"
 
   tasks:
     - name: Enter configuration mode and apply settings
@@ -53,6 +53,14 @@
           - set firewall ipv4 name WANTOLAN rule 10 state established
           - set firewall ipv4 name WANTOLAN rule 10 state related
           - set firewall zone LAN from WAN firewall name WANTOLAN
+
+          # SSH
+          - set firewall ipv4 name LANTOLOCAL default-action drop
+          - set firewall ipv4 name LANTOLOCAL rule 10 action accept
+          - set firewall ipv4 name LANTOLOCAL rule 10 protocol tcp
+          - set firewall ipv4 name LANTOLOCAL rule 10 destination port 22
+          - set firewall ipv4 name LANTOLOCAL rule 10 source address 172.16.2.0/24
+          - set firewall zone LOCAL from LAN firewall name LANTOLOCAL
 
           # DNS
           - set system name-server 1.1.1.1
