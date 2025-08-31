@@ -9,6 +9,7 @@
     wan_gateway: "IP"
     lan_ip: "IP/CIDR"
     lan_subnet: "IP/CIDR"
+    dns_address: "IP"
     vrrp_wan_address: "IP/CIDR"
     vrrp_lan_address: "IP/CIDR"
 
@@ -31,13 +32,13 @@
           - set nat source rule 100 outbound-interface name eth0
           - set nat source rule 100 source address {{ lan_subnet }}
           - set nat source rule 100 translation address masquerade
-          
+
           # DNS
           - set system name-server 1.1.1.1
           - set system name-server 8.8.8.8
           - set service dns forwarding
           - set service dns forwarding allow-from {{ lan_subnet }}
-          - set service dns forwarding listen-address {{ vrrp_lan_address }}
+          - set service dns forwarding listen-address {{ dns_address }}
           - set service dns forwarding system
 
           # Firewall Rules
