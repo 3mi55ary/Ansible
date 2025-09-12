@@ -5,6 +5,7 @@
   become: yes
   vars:
     admin_password: "YOUR_NEW_PASSWORD"
+    hostname: "HOSTNAME"
     wan_ip: "IP/CIDR"
     wan_gateway: "IP"
     lan_ip: "IP/CIDR"
@@ -13,6 +14,7 @@
     dns_address: "IP"
     vrrp_wan_address: "IP/CIDR"
     vrrp_lan_address: "IP/CIDR"
+    vrrp_priority: "NUMBER"
 
   tasks:
     - name: Enter configuration mode and apply settings
@@ -20,7 +22,7 @@
         lines:
           # General system setup
           - set system login user vyos authentication plaintext-password {{ admin_password }}
-          - set system host-name IndulgenceOfConviction
+          - set system host-name {{ hostname }}
 
           # Interface setup
           - set interfaces ethernet eth0 address {{ wan_ip }}
@@ -88,17 +90,17 @@
           - set firewall ipv4 name LANTOLOCAL rule 10 action accept
           - set firewall ipv4 name LANTOLOCAL rule 10 protocol tcp
           - set firewall ipv4 name LANTOLOCAL rule 10 destination port 22
-          - set firewall ipv4 name LANTOLOCAL rule 10 source address 172.16.2.0/24
+          - set firewall ipv4 name LANTOLOCAL rule 10 source address {{ lan_ip }}
 
           - set firewall ipv4 name LANTOLOCAL rule 20 action accept
           - set firewall ipv4 name LANTOLOCAL rule 20 protocol udp
           - set firewall ipv4 name LANTOLOCAL rule 20 destination port 53
-          - set firewall ipv4 name LANTOLOCAL rule 20 source address 172.16.2.0/24
+          - set firewall ipv4 name LANTOLOCAL rule 20 source address {{ lan_ip }}
 
           - set firewall ipv4 name LANTOLOCAL rule 21 action accept
           - set firewall ipv4 name LANTOLOCAL rule 21 protocol tcp
           - set firewall ipv4 name LANTOLOCAL rule 21 destination port 53
-          - set firewall ipv4 name LANTOLOCAL rule 21 source address 172.16.2.0/24
+          - set firewall ipv4 name LANTOLOCAL rule 21 source address {{ lan_ip }}
 
           - set firewall zone LOCAL from LAN firewall name LANTOLOCAL
 
@@ -112,13 +114,13 @@
           - set high-availability vrrp group WAN vrid 10
           - set high-availability vrrp group WAN interface eth0
           - set high-availability vrrp group WAN address {{ vrrp_wan_address }}
-          - set high-availability vrrp group WAN priority 150
+          - set high-availability vrrp group WAN priority {{ vrrp_priority }}
           - set high-availability vrrp group WAN preempt-delay 5
 
           - set high-availability vrrp group LAN vrid 20
           - set high-availability vrrp group LAN interface eth1
           - set high-availability vrrp group LAN address {{ vrrp_lan_address }}
-          - set high-availability vrrp group LAN priority 150
+          - set high-availability vrrp group LAN priority {{ vrrp_priority }}
           - set high-availability vrrp group LAN preempt-delay 5
 
         save: true
