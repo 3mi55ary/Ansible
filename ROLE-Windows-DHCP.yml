@@ -1,0 +1,27 @@
+- name: Install DHCP Server role
+  tags: [dhcp]
+  win_feature:
+    name: DHCP
+    state: present
+
+- name: Start DHCP Server service
+  tags: [dhcp]
+  win_service:
+    name: DHCPServer
+    start_mode: auto
+    state: started
+
+- name: Create DHCP scope
+  tags: [dhcp]
+  win_shell: |
+    Add-DhcpServerv4Scope -Name "{{ dhcp_scope_name }}" `
+      -StartRange "{{ dhcp_scope_start }}" `
+      -EndRange "{{ dhcp_scope_end }}" `
+      -SubnetMask "{{ dhcp_subnet_mask }}" `
+      -LeaseDuration '{{ dhcp_lease_days }}.00:00:00'
+
+- name: Set default gateway option
+  tags: [dhcp]
+  win_shell: |
+    Set-DhcpServerv4OptionValue -ScopeId "{{ dhcp_scope_start | regex_replace('\\d+$', '0') }}" `
+      -Router "{{ dhcp_router }}"

@@ -1,0 +1,24 @@
+- name: Install Hyper-V role with management tools
+  tags: [hyperv]
+  win_feature:
+    name: Hyper-V
+    state: present
+    include_management_tools: true
+
+- name: Ensure Hyper-V services are running
+  tags: [hyperv]
+  win_service:
+    name: vmms
+    start_mode: auto
+    state: started
+
+- name: Confirm Hyper-V is installed
+  tags: [hyperv]
+  win_shell: |
+    Get-WindowsFeature -Name Hyper-V | Select-Object -ExpandProperty InstallState
+  register: hyperv_status
+
+- name: Display Hyper-V install status
+  tags: [hyperv]
+  debug:
+    msg: "Hyper-V install state: {{ hyperv_status.stdout }}"

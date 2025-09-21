@@ -1,0 +1,22 @@
+- name: Install DNS Server role
+  tags: [dns]
+  win_feature:
+    name: DNS
+    state: present
+
+- name: Start DNS Server service
+  tags: [dns]
+  win_service:
+    name: DNS
+    start_mode: auto
+    state: started
+
+- name: Create forward lookup zone
+  tags: [dns]
+  win_shell: |
+    Add-DnsServerPrimaryZone -Name "{{ dns_zone_name }}" -ZoneFile "{{ dns_zone_name }}.dns" -DynamicUpdate "Secure"
+
+- name: Configure DNS forwarders
+  tags: [dns]
+  win_shell: |
+    Set-DnsServerForwarder -IPAddress {{ dns_forwarders | join(',') }} -UseRootHint $false

@@ -1,0 +1,21 @@
+- name: Install RRAS and Routing features
+  tags: [routing]
+  win_feature:
+    name: RemoteAccess
+    state: present
+
+- name: Install Routing Management Tools
+  tags: [routing]
+  win_shell: |
+    Install-WindowsFeature Routing -IncludeManagementTools
+
+- name: Enable NAT on external interface
+  tags: [routing]
+  win_shell: |
+    netsh routing ip nat install
+    netsh routing ip nat add interface "{{ external_interface }}" full
+
+- name: Configure internal interface for private routing
+  tags: [routing]
+  win_shell: |
+    netsh routing ip nat add interface "{{ internal_interface }}" private

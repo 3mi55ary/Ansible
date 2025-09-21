@@ -1,0 +1,9 @@
+- name: Promote to Domain Controller
+  tags: [dc]
+  microsoft.ad.domain_controller:
+    dns_domain_name: "{{ domain }}"
+    domain_admin_user: "Administrator"
+    domain_admin_password: "{{ domain_admin_password }}"
+    safe_mode_password: "{{ safe_mode_password }}"
+    install_dns: false
+    reboot_after_install: true

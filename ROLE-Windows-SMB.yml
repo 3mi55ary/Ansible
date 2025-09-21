@@ -1,0 +1,16 @@
+- name: Ensure share folder exists
+  tags: [smb]
+  win_file:
+    path: "{{ smb_share_path }}"
+    state: directory
+
+- name: Create SMB share
+  tags: [smb]
+  ansible.windows.win_share:
+    name: "{{ smb_share_name }}"
+    path: "{{ smb_share_path }}"
+    description: "{{ smb_share_description }}"
+    list: "{{ smb_share_list }}"
+    full: "{{ smb_share_full_access }}"
+    read: "{{ smb_share_read_access }}"
+    deny: "{{ smb_share_deny_access }}"

@@ -1,0 +1,37 @@
+- name: Install Exchange prerequisites
+  tags: [exchange]
+  win_feature:
+    name:
+      - NET-Framework-Features
+      - RSAT-ADDS
+      - Web-Server
+      - Web-Basic-Auth
+      - Web-Windows-Auth
+      - Web-Mgmt-Console
+      - Web-Mgmt-Service
+      - WAS
+      - Web-Asp-Net45
+      - RPC-over-HTTP-proxy
+    state: present
+    include_management_tools: true
+
+- name: Copy Exchange setup files (if needed)
+  tags: [exchange]
+  win_copy:
+    src: "/path/to/exchange/setup/files/"
+    dest: "{{ exchange_install_path }}"
+  when: exchange_iso_path is not defined
+
+- name: Run unattended Exchange install
+  tags: [exchange]
+  win_shell: |
+    "{{ exchange_iso_path }}" /mode:Install /role:{{ exchange_role }} `
+    /IAcceptExchangeServerLicenseTerms_DiagnosticDataOFF `
+    /OrganizationName:"{{ exchange_org_name }}" `
+    /DomainController:"{{ exchange_domain }}" `
+    /InstallWindowsComponents
+
+- name: Validate Exchange install
+  tags: [exchange]
+  win_shell: |
+    Get-ExchangeServer | Format-List Name,Edition,AdminDisplayVersion

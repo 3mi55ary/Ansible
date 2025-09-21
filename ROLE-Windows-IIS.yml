@@ -1,0 +1,29 @@
+- name: Install IIS and management tools
+  tags: [iis]
+  win_feature:
+    name: Web-Server
+    state: present
+    include_sub_features: true
+    include_management_tools: true
+
+- name: Ensure IIS service is running
+  tags: [iis]
+  win_service:
+    name: W3SVC
+    start_mode: auto
+    state: started
+
+- name: Create IIS website
+  tags: [iis]
+  microsoft.iis.website:
+    name: "{{ iis_site_name }}"
+    state: started
+    port: "{{ iis_port }}"
+    ip: "{{ iis_ip }}"
+    physical_path: "{{ iis_physical_path }}"
+
+- name: Deploy sample index.html
+  tags: [iis]
+  win_copy:
+    src: index.html
+    dest: "{{ iis_physical_path }}\\index.html"
